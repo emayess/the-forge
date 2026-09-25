@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="The Forge — fathers and sons growing through faith, skill, service, and adventure." />
+  <meta name="theme-color" content="#151b17" />
+  <title>The Forge | Fathers & Sons</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Roboto+Slab:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="ambient ambient-a" aria-hidden="true"></div>
+  <div class="ambient ambient-b" aria-hidden="true"></div>
+
+  <header class="site-header" id="top">
+    <a class="brand" href="#top" aria-label="The Forge home">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 64 64" role="img">
+          <path d="M10 17h43v8H36v7h10c0 10-6 18-18 18H17l5-9H10c-4 0-7-3-7-7s3-7 7-7h12v-2H10z" fill="currentColor"/>
+          <path d="M24 50h12l5 9H19z" fill="currentColor" opacity=".78"/>
+        </svg>
+      </span>
+      <span class="brand-copy">
+        <strong>The Forge</strong>
+        <small>Fathers · Sons · Faith · Skill · Service</small>
+      </span>
+    </a>
+
+    <button class="menu-toggle" id="menuToggle" type="button" aria-expanded="false" aria-controls="siteNav" aria-label="Toggle navigation">
+      <span></span><span></span><span></span>
+    </button>
+
+    <nav class="site-nav" id="siteNav" aria-label="Primary navigation">
+      <a href="#vision">Vision</a>
+      <a href="#core-formation-themes">Formation</a>
+      <a href="#big-event-1-be-prepared">Events</a>
+      <a href="#the-dads-challenge">Dads</a>
+      <a href="#potential-program-identity">Identity</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="heroTitle">
+      <div class="hero-grid"></div>
+      <div class="hero-inner reveal">
+        <p class="eyebrow">A working concept for fathers & sons</p>
+        <h1 id="heroTitle">The <span>Forge</span></h1>
+        <p class="hero-lede" id="heroLede">Fathers walking alongside their sons as they learn to work, provide, protect, lead, and serve.</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="#vision">Explore the vision</a>
+          <a class="button button-ghost" href="#possible-yearly-rhythm">See the rhythm</a>
+        </div>
+        <div class="principles" aria-label="Core themes">
+          <span>Work</span><i></i><span>Provide</span><i></i><span>Protect</span><i></i><span>Lead</span><i></i><span>Serve</span>
+        </div>
+      </div>
+      <a class="scroll-cue" href="#vision" aria-label="Scroll to content">
+        <span>Scroll</span><b>↓</b>
+      </a>
+    </section>
+
+    <section class="intro-strip reveal">
+      <div>
+        <span class="kicker">Our rhythm</span>
+        <strong>Learn → Practice → Serve → Adventure → Reflect</strong>
+      </div>
+      <p>The smaller gatherings build the skills and character that come alive during larger shared experiences.</p>
+    </section>
+
+    <div class="page-shell">
+      <aside class="toc" aria-label="On this page">
+        <div class="toc-inner">
+          <p>On this page</p>
+          <nav id="tocNav"></nav>
+        </div>
+      </aside>
+
+      <article id="content" class="markdown-body" aria-live="polite">
+        <div class="loading">
+          <div class="ember"></div>
+          <p>Loading The Forge…</p>
+        </div>
+      </article>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div>
+      <span class="brand-mark small" aria-hidden="true">
+        <svg viewBox="0 0 64 64"><path d="M10 17h43v8H36v7h10c0 10-6 18-18 18H17l5-9H10c-4 0-7-3-7-7s3-7 7-7h12v-2H10z" fill="currentColor"/><path d="M24 50h12l5 9H19z" fill="currentColor" opacity=".78"/></svg>
+      </span>
+      <div><strong>The Forge</strong><p>A draft concept, meant to be refined together.</p></div>
+    </div>
+    <a href="#top">Back to top ↑</a>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

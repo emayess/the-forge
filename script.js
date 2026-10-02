@@ -1,121 +1,73 @@
-const slugify = (text) => text
-  .replace(/^\s*\d+\.\s*/, '')
-  .toLowerCase()
-  .replace(/[“”"'’]/g, "")
-  .replace(/&/g, "and")
-  .replace(/[^a-z0-9]+/g, "-")
-  .replace(/^-+|-+$/g, "");
-
+const slugify = text => text.replace(/^\s*\d+\.\s*/, '').toLowerCase().replace(/[“”"'’]/g, '').replace(/&/g,'and').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
 const menuToggle = document.getElementById('menuToggle');
 const siteNav = document.getElementById('siteNav');
-menuToggle.addEventListener('click', () => {
-  const open = siteNav.classList.toggle('open');
-  menuToggle.setAttribute('aria-expanded', String(open));
-});
-siteNav.addEventListener('click', (e) => {
-  if (e.target.matches('a')) {
-    siteNav.classList.remove('open');
-    menuToggle.setAttribute('aria-expanded', 'false');
+menuToggle.addEventListener('click', () => { const open = siteNav.classList.toggle('open'); menuToggle.setAttribute('aria-expanded', String(open)); });
+siteNav.addEventListener('click', () => { siteNav.classList.remove('open'); menuToggle.setAttribute('aria-expanded', 'false'); });
+menuToggle.addEventListener('keydown', e => { if(e.key === 'Escape') { siteNav.classList.remove('open'); menuToggle.setAttribute('aria-expanded','false'); } });
+function splitPages(markdown) {
+  const pages = {};
+  const pattern = /<!-- page:([a-z-]+) -->\s*([\s\S]*?)(?=<!-- page:|$)/g;
+  for(const match of markdown.matchAll(pattern)) pages[match[1]] = match[2].trim().replace(/\n---\s*$/, '');
+  return pages;
+}
+function sectionGroups(article) {
+  const headings = [...article.querySelectorAll(':scope > h2')];
+  headings.forEach(heading => {
+    const wrapper = document.createElement('section');
+    wrapper.className = 'home-section'; wrapper.id = slugify(heading.textContent);
+    article.insertBefore(wrapper,heading);
+    let node=heading;
+    while(node) { const next=node.nextSibling; if(node!==heading && node.nodeType===1 && node.matches('h2')) break; wrapper.appendChild(node); node=next; }
+  });
+  const eventSection = article.querySelector('#adventures-with-a-purpose');
+  if(eventSection) {
+    const grid=document.createElement('div');grid.className='event-grid';
+    [...eventSection.querySelectorAll('h3')].forEach((heading,index) => {
+      const card=document.createElement('div');card.className='event-card';
+      let node=heading;
+      while(node) { const next=node.nextSibling; if(node!==heading && node.nodeType===1 && node.matches('h3')) break; card.appendChild(node);node=next; }
+      const link=card.querySelector('a');
+      if(link) { link.className='card-link';link.setAttribute('aria-label',heading.textContent+' — event details'); }
+      if(index===0)card.classList.add('kickoff-card');
+      const number=document.createElement('span'); number.className='card-number';number.setAttribute('aria-hidden','true');number.textContent=String(index+1).padStart(2,'0');card.prepend(number);
+      grid.appendChild(card);
+    });
+    eventSection.appendChild(grid);
   }
-});
-
+}
 function createToc(article) {
-  const nav = document.getElementById('tocNav');
-  const headings = [...article.querySelectorAll('h1')].filter((h, i) => i > 0);
-  nav.innerHTML = '';
-
-  headings.forEach((heading) => {
-    if (!heading.id) heading.id = slugify(heading.textContent);
-    const a = document.createElement('a');
-    a.href = `#${heading.id}`;
-    a.textContent = heading.textContent.replace(/^\d+\.\s*/, '');
-    nav.appendChild(a);
-  });
-
-  const links = [...nav.querySelectorAll('a')];
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        links.forEach(link => link.classList.toggle('active', link.hash === `#${entry.target.id}`));
-      }
-    });
-  }, { rootMargin: '-20% 0px -68% 0px' });
-  headings.forEach(h => observer.observe(h));
+  const nav=document.getElementById('tocNav');if(!nav)return;
+  const counts={};
+  [...article.querySelectorAll('h1,h2,h3')].forEach(h => { const slug=slugify(h.textContent)||'section';counts[slug]=(counts[slug]||0)+1;h.id=slug+(counts[slug]>1?'-'+counts[slug]:''); });
+  const level=document.body.dataset.page==='plan'?'h1':'h2';
+  [...article.querySelectorAll(level)].forEach(h => {const a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent.replace(/^\d+\.\s*/,'');nav.appendChild(a);});
 }
-
-function enhanceContent(article) {
-  const allHeadings = article.querySelectorAll('h1,h2,h3');
-  allHeadings.forEach(h => { if (!h.id) h.id = slugify(h.textContent); });
-
-  // Style WORK / PROVIDE / PROTECT / LEAD / SERVE sections as grouped cards.
-  const themeNames = new Set(['WORK','PROVIDE','PROTECT','LEAD','SERVE']);
-  [...article.querySelectorAll('h2')].forEach(h2 => {
-    if (themeNames.has(h2.textContent.trim())) {
-      const wrapper = document.createElement('section');
-      wrapper.className = 'theme-card';
-      h2.parentNode.insertBefore(wrapper, h2);
-      let node = h2;
-      while (node) {
-        const next = node.nextSibling;
-        if (node !== h2 && node.nodeType === 1 && (node.matches('h2') || node.matches('hr') || node.matches('h1'))) break;
-        wrapper.appendChild(node);
-        node = next;
-      }
-    }
-  });
-
-  [...article.querySelectorAll('h1')].forEach(h1 => {
-    if (/Big Event #/i.test(h1.textContent)) h1.classList.add('event-heading');
-  });
-
-  const revealObserver = new IntersectionObserver((entries, observer) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { threshold: .08, rootMargin: '0px 0px -30px' });
-  [...article.children].forEach(el => revealObserver.observe(el));
-}
-
 async function loadMarkdown() {
-  const article = document.getElementById('content');
+  const article=document.getElementById('content');
   try {
-    const response = await fetch('content.md', { cache: 'no-cache' });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const markdown = await response.text();
-
-    marked.use({ gfm: true, breaks: false });
-    const unsafeHtml = marked.parse(markdown);
-    article.innerHTML = DOMPurify.sanitize(unsafeHtml);
-
-    const vision = [...article.querySelectorAll('blockquote p')][0];
-    if (vision) {
-      const text = vision.textContent.replace(/^Working vision:\s*/i, '');
-      document.getElementById('heroLede').textContent = text;
+    const response=await fetch('content.md',{cache:'no-cache'});
+    if(!response.ok)throw new Error('Content could not be retrieved.');
+    const markdown=await response.text();const pages=splitPages(markdown);const page=document.body.dataset.page||'home';
+    const collections={about:['vision','identity','bigger-idea'],formation:['rhythm','formation','year','progression'],dads:['dads']};
+    let source;
+    if(page==='plan') source=markdown.split('<!-- page:home -->')[0];
+    else if(collections[page])source=collections[page].map(key=>pages[key]).join('\n\n---\n\n');
+    else source=pages[page];
+    if(!source)throw new Error('This page could not be found in the working plan.');
+    article.innerHTML=DOMPurify.sanitize(marked.parse(source,{gfm:true}));
+    if(page==='home') {
+      const heading=article.querySelector('h1'),lede=heading?.nextElementSibling;
+      document.getElementById('heroTitle').textContent=heading?.textContent||'The Forge';
+      document.getElementById('heroLede').textContent=lede?.textContent||'';
+      heading?.remove();lede?.remove();sectionGroups(article);
+    } else {
+      const first=article.querySelector('h1');
+      document.title=(first?.textContent.replace(/^\d+\.\s*/,'')||'Working plan')+' | The Forge';
+      createToc(article);
     }
-
-    enhanceContent(article);
-    createToc(article);
-  } catch (error) {
-    article.innerHTML = `
-      <section class="theme-card visible">
-        <h2>Unable to load content.md</h2>
-        <p>This site reads its content from <strong>content.md</strong>. If you're opening the HTML directly from your computer, run a small local web server or deploy the folder to a static host.</p>
-        <p><code>${String(error.message)}</code></p>
-      </section>`;
+    if(location.hash)document.getElementById(location.hash.slice(1))?.scrollIntoView();
+  } catch(error) {
+    article.innerHTML='<h2>We couldn’t load this page.</h2><p>Please refresh or <a href="content.md">open the Markdown working plan</a>.</p>';
   }
 }
-
-const staticReveal = new IntersectionObserver((entries, observer) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('visible');
-      observer.unobserve(entry.target);
-    }
-  });
-}, { threshold: .1 });
-document.querySelectorAll('.reveal').forEach(el => staticReveal.observe(el));
-
 loadMarkdown();

@@ -1,6 +1,8 @@
 const slugify = text => text.replace(/^\s*\d+\.\s*/, '').toLowerCase().replace(/[“”"'’]/g, '').replace(/&/g,'and').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
 const menuToggle = document.getElementById('menuToggle');
 const siteNav = document.getElementById('siteNav');
+// Fragment links must stay on this page even when event shells use a base URL.
+document.querySelectorAll('a[href^="#"]').forEach(a => { a.href = location.pathname + a.getAttribute('href'); });
 menuToggle.addEventListener('click', () => { const open = siteNav.classList.toggle('open'); menuToggle.setAttribute('aria-expanded', String(open)); });
 siteNav.addEventListener('click', () => { siteNav.classList.remove('open'); menuToggle.setAttribute('aria-expanded', 'false'); });
 menuToggle.addEventListener('keydown', e => { if(e.key === 'Escape') { siteNav.classList.remove('open'); menuToggle.setAttribute('aria-expanded','false'); } });
@@ -40,7 +42,7 @@ function createToc(article) {
   const counts={};
   [...article.querySelectorAll('h1,h2,h3')].forEach(h => { const slug=slugify(h.textContent)||'section';counts[slug]=(counts[slug]||0)+1;h.id=slug+(counts[slug]>1?'-'+counts[slug]:''); });
   const level=document.body.dataset.page==='plan'?'h1':'h2';
-  [...article.querySelectorAll(level)].forEach(h => {const a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent.replace(/^\d+\.\s*/,'');nav.appendChild(a);});
+  [...article.querySelectorAll(level)].forEach(h => {const a=document.createElement('a');a.href=location.pathname+'#'+h.id;a.textContent=h.textContent.replace(/^\d+\.\s*/,'');nav.appendChild(a);});
 }
 async function loadMarkdown() {
   const article=document.getElementById('content');
